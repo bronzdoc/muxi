@@ -29,7 +29,7 @@ func NewSession(name string) *Session {
 		command: []map[string]interface{}{
 			{
 				"cmd":  BASECOMMAND,
-				"args": []string{"new", "-s", newName, "-d"},
+				"args": []string{"rename-session", newName},
 			},
 			{
 				"cmd":  BASECOMMAND,
@@ -41,6 +41,7 @@ func NewSession(name string) *Session {
 
 // Adds windows to the session
 func (s *Session) AddWindow(window *Window) {
+	window.Setup(s.name)
 	s.windows = append(s.windows, window)
 }
 
