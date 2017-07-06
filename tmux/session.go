@@ -31,10 +31,6 @@ func NewSession(name string) *Session {
 				"cmd":  BASECOMMAND,
 				"args": []string{"rename-session", newName},
 			},
-			{
-				"cmd":  BASECOMMAND,
-				"args": []string{"switch-client", "-t", newName},
-			},
 		},
 	}
 }
