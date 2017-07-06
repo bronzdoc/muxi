@@ -6,35 +6,48 @@ import (
 	"os/exec"
 )
 
+var WINDOW_INDEX = 0
+
 type Window struct {
-	session string
-	name    string
-	panes   []Pane
-	command []map[string]interface{}
+	sessionName string
+	name        string
+	panes       []*Pane
+	command     []map[string]interface{}
 }
 
-func NewWindow(session, name string, panes []Pane) *Window {
+func NewWindow(name string) *Window {
+	WINDOW_INDEX += 1
+
 	return &Window{
-		name:  name,
-		panes: panes,
-		command: []map[string]interface{}{
-			{
-				"cmd": BASECOMMAND,
-				"args": []string{
-					"send-keys",
-					"-t",
-					session,
-					fmt.Sprintf("%s new-window", BASECOMMAND),
-					"c-m",
-				},
+		name: name,
+	}
+}
+
+func (w *Window) Setup(sessionName string) {
+	w.sessionName = sessionName
+	w.command = []map[string]interface{}{
+		{
+			"cmd": BASECOMMAND,
+			"args": []string{
+				"send-keys",
+				"-t",
+				sessionName,
+				fmt.Sprintf("%s new-window", BASECOMMAND),
+				"c-m",
 			},
 		},
 	}
 }
 
 // Get window panes
-func (w *Window) Panes() []Pane {
+func (w *Window) Panes() []*Pane {
 	return w.panes
+}
+
+// Add a new window pane
+func (w *Window) AddPane(pane *Pane) {
+	pane.Setup(w.SessionName())
+	w.panes = append(w.panes, pane)
 }
 
 // Get window name
@@ -45,7 +58,6 @@ func (w *Window) Name() string {
 // Creates a new tmux session
 func (w *Window) Create() {
 	for _, c := range w.command {
-		fmt.Println(c["args"])
 		cmd := exec.Command(c["cmd"].(string), c["args"].([]string)...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
@@ -59,4 +71,13 @@ func (w *Window) Create() {
 			fmt.Println(err)
 		}
 	}
+
+	// Create session windows
+	for _, p := range w.panes {
+		p.Create()
+	}
+}
+
+func (w *Window) SessionName() string {
+	return w.sessionName
 }
