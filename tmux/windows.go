@@ -29,11 +29,7 @@ func (w *Window) Setup(sessionName string) {
 		{
 			"cmd": BASECOMMAND,
 			"args": []string{
-				"send-keys",
-				"-t",
-				sessionName,
-				fmt.Sprintf("%s new-window", BASECOMMAND),
-				"c-m",
+				"new-window",
 			},
 		},
 	}

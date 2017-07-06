@@ -20,9 +20,7 @@ func (p *Pane) Setup(sessionName string) {
 		{
 			"cmd": BASECOMMAND,
 			"args": []string{
-				"send-keys",
-				fmt.Sprintf("%s split-window -t %s", BASECOMMAND, sessionName),
-				"c-m",
+				"split-window",
 			},
 		},
 	}
