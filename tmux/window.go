@@ -1,10 +1,6 @@
 package tmux
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/bronzdoc/muxi/tmux/command"
 )
 
@@ -15,7 +11,6 @@ type Window struct {
 	name        string
 	panes       []*Pane
 	tmuxCommand *command.NewWindow
-	commands    []string
 }
 
 func NewWindow(name string) *Window {
@@ -72,25 +67,6 @@ func (w *Window) createPanes() {
 
 func (w *Window) shell(commands []string) {
 	for _, cmd := range commands {
-		shell := []string{
-			"send-keys",
-			"-t",
-			w.sessionName,
-			cmd,
-			"c-m",
-		}
-
-		cmd := exec.Command("tmux", shell...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
+		command.NewShellCommand(w.sessionName, cmd).Execute()
 	}
 }
