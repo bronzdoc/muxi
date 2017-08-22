@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/bronzdoc/muxi/tmux/command"
 )
 
 var WINDOW_INDEX = 0
@@ -12,7 +14,7 @@ type Window struct {
 	sessionName string
 	name        string
 	panes       []*Pane
-	command     []map[string]interface{}
+	tmuxCommand *command.NewWindow
 	commands    []string
 }
 
@@ -20,20 +22,13 @@ func NewWindow(name string) *Window {
 	WINDOW_INDEX += 1
 
 	return &Window{
-		name: name,
+		name:        name,
+		tmuxCommand: command.NewWindowCommand(),
 	}
 }
 
 func (w *Window) Setup(sessionName string) {
 	w.sessionName = sessionName
-	w.command = []map[string]interface{}{
-		{
-			"cmd": BASECOMMAND,
-			"args": []string{
-				"new-window",
-			},
-		},
-	}
 }
 
 // Get window panes
@@ -54,20 +49,7 @@ func (w *Window) Name() string {
 
 // Creates a new tmux window
 func (w *Window) Create() {
-	for _, c := range w.command {
-		cmd := exec.Command(c["cmd"].(string), c["args"].([]string)...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
-	}
+	w.tmuxCommand.Execute()
 
 	if len(w.panes) != 0 {
 		firstIndex := 0
