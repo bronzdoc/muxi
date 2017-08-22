@@ -7,20 +7,17 @@ import (
 var PANE_INDEX = 0
 
 type Pane struct {
-	index       int
-	sessionName string
-	tmuxCommand *command.NewPane
-	commands    []string
+	tmuxObject
+	index    int
+	commands []string
 }
 
 func NewPane() *Pane {
 	return &Pane{
-		tmuxCommand: command.NewPaneCommand(),
+		tmuxObject: tmuxObject{
+			tmuxCommand: command.NewPaneCommand(),
+		},
 	}
-}
-
-func (p *Pane) Setup(sessionName string) {
-	p.sessionName = sessionName
 }
 
 // Adds a new command to execute in pane

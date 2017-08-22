@@ -7,23 +7,20 @@ import (
 var WINDOW_INDEX = 0
 
 type Window struct {
-	sessionName string
-	name        string
-	panes       []*Pane
-	tmuxCommand *command.NewWindow
+	tmuxObject
+	name  string
+	panes []*Pane
 }
 
 func NewWindow(name string) *Window {
 	WINDOW_INDEX += 1
 
 	return &Window{
-		name:        name,
-		tmuxCommand: command.NewWindowCommand(),
+		name: name,
+		tmuxObject: tmuxObject{
+			tmuxCommand: command.NewWindowCommand(),
+		},
 	}
-}
-
-func (w *Window) Setup(sessionName string) {
-	w.sessionName = sessionName
 }
 
 // Get window panes
@@ -33,7 +30,7 @@ func (w *Window) Panes() []*Pane {
 
 // Add a new window pane
 func (w *Window) AddPane(pane *Pane) {
-	pane.Setup(w.SessionName())
+	pane.SetSessionName(w.SessionName())
 	w.panes = append(w.panes, pane)
 }
 

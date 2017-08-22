@@ -8,9 +8,8 @@ import (
 )
 
 type Session struct {
-	name        string
-	windows     []*Window
-	tmuxCommand *command.NewSession
+	tmuxObject
+	windows []*Window
 }
 
 // New Session
@@ -25,14 +24,16 @@ func NewSession(name string) *Session {
 	}
 
 	return &Session{
-		name:        newName,
-		tmuxCommand: command.NewSessionCommand(newName),
+		tmuxObject: tmuxObject{
+			tmuxCommand: command.NewSessionCommand(newName),
+			sessionName: newName,
+		},
 	}
 }
 
 // Adds windows to the session
 func (s *Session) AddWindow(window *Window) {
-	window.Setup(s.name)
+	window.SetSessionName(s.Name())
 	s.windows = append(s.windows, window)
 }
 
@@ -43,7 +44,7 @@ func (s *Session) Windows() []*Window {
 
 // Get session name
 func (s *Session) Name() string {
-	return s.name
+	return s.SessionName()
 }
 
 // Creates a new tmux session
