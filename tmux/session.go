@@ -3,14 +3,14 @@ package tmux
 import (
 	"fmt"
 	"math/rand"
-	"os"
-	"os/exec"
+
+	"github.com/bronzdoc/muxi/tmux/command"
 )
 
 type Session struct {
-	name    string
-	windows []*Window
-	command []map[string]interface{}
+	name        string
+	windows     []*Window
+	tmuxCommand *command.NewSession
 }
 
 // New Session
@@ -25,13 +25,8 @@ func NewSession(name string) *Session {
 	}
 
 	return &Session{
-		name: newName,
-		command: []map[string]interface{}{
-			{
-				"cmd":  BASECOMMAND,
-				"args": []string{"rename-session", newName},
-			},
-		},
+		name:        newName,
+		tmuxCommand: command.NewSessionCommand(newName),
 	}
 }
 
@@ -53,20 +48,7 @@ func (s *Session) Name() string {
 
 // Creates a new tmux session
 func (s *Session) Create() {
-	for _, c := range s.command {
-		cmd := exec.Command(c["cmd"].(string), c["args"].([]string)...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
-	}
+	s.tmuxCommand.Execute()
 
 	// Create session windows
 	for _, w := range s.windows {
