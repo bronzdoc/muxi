@@ -9,7 +9,7 @@ import (
 
 const TMUX = "tmux"
 
-type Executable interface {
+type TmuxCommand interface {
 	Execute()
 }
 
