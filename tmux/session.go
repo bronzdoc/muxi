@@ -7,12 +7,13 @@ import (
 	"github.com/bronzdoc/muxi/tmux/command"
 )
 
+// Represents a tmux session
 type Session struct {
 	tmuxObject
 	windows []*Window
 }
 
-// New Session
+// Creates a new Session
 func NewSession(name string) *Session {
 	newName := name
 	const RANDSOURCE = 100000
@@ -47,7 +48,7 @@ func (s *Session) Name() string {
 	return s.SessionName()
 }
 
-// Creates a new tmux session
+// Creates a new tmux session and its windows
 func (s *Session) Create() {
 	s.tmuxCommand.Execute()
 

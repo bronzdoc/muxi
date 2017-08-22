@@ -6,12 +6,14 @@ import (
 
 var PANE_INDEX = 0
 
+// Represents a tmux pane
 type Pane struct {
 	tmuxObject
 	index    int
 	commands []string
 }
 
+// Create a new Pane
 func NewPane() *Pane {
 	return &Pane{
 		tmuxObject: tmuxObject{
@@ -25,7 +27,7 @@ func (p *Pane) AddCommand(cmd string) {
 	p.commands = append(p.commands, cmd)
 }
 
-// Creates a new tmux pane
+// Creates a new tmux pane and execute the pane commands
 func (p *Pane) Create() {
 	p.index = PANE_INDEX
 
@@ -38,6 +40,6 @@ func (p *Pane) Create() {
 
 func (p *Pane) shell(commands []string) {
 	for _, cmd := range commands {
-		command.NewShellCommand(p.sessionName, cmd).Execute()
+		command.NewShellCommand(p.SessionName(), cmd).Execute()
 	}
 }

@@ -6,12 +6,14 @@ import (
 
 var WINDOW_INDEX = 0
 
+// Window Represents a tmux windows
 type Window struct {
 	tmuxObject
 	name  string
 	panes []*Pane
 }
 
+// Create a new Window
 func NewWindow(name string) *Window {
 	WINDOW_INDEX += 1
 
@@ -45,10 +47,6 @@ func (w *Window) Create() {
 	w.createPanes()
 }
 
-func (w *Window) SessionName() string {
-	return w.sessionName
-}
-
 func (w *Window) createPanes() {
 	if len(w.panes) != 0 {
 		firstIndex := 0
@@ -64,6 +62,6 @@ func (w *Window) createPanes() {
 
 func (w *Window) shell(commands []string) {
 	for _, cmd := range commands {
-		command.NewShellCommand(w.sessionName, cmd).Execute()
+		command.NewShellCommand(w.SessionName(), cmd).Execute()
 	}
 }
