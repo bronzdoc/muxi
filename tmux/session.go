@@ -3,17 +3,17 @@ package tmux
 import (
 	"fmt"
 	"math/rand"
-	"os"
-	"os/exec"
+
+	"github.com/bronzdoc/muxi/tmux/command"
 )
 
+// Represents a tmux session
 type Session struct {
-	name    string
+	tmuxObject
 	windows []*Window
-	command []map[string]interface{}
 }
 
-// New Session
+// Creates a new Session
 func NewSession(name string) *Session {
 	newName := name
 	const RANDSOURCE = 100000
@@ -25,19 +25,16 @@ func NewSession(name string) *Session {
 	}
 
 	return &Session{
-		name: newName,
-		command: []map[string]interface{}{
-			{
-				"cmd":  BASECOMMAND,
-				"args": []string{"rename-session", newName},
-			},
+		tmuxObject: tmuxObject{
+			tmuxCommand: command.NewSessionCommand(newName),
+			sessionName: newName,
 		},
 	}
 }
 
 // Adds windows to the session
 func (s *Session) AddWindow(window *Window) {
-	window.Setup(s.name)
+	window.SetSessionName(s.Name())
 	s.windows = append(s.windows, window)
 }
 
@@ -48,25 +45,12 @@ func (s *Session) Windows() []*Window {
 
 // Get session name
 func (s *Session) Name() string {
-	return s.name
+	return s.SessionName()
 }
 
-// Creates a new tmux session
+// Creates a new tmux session and its windows
 func (s *Session) Create() {
-	for _, c := range s.command {
-		cmd := exec.Command(c["cmd"].(string), c["args"].([]string)...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
-	}
+	s.tmuxCommand.Execute()
 
 	// Create session windows
 	for _, w := range s.windows {

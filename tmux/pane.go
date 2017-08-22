@@ -1,32 +1,23 @@
 package tmux
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
+	"github.com/bronzdoc/muxi/tmux/command"
 )
 
 var PANE_INDEX = 0
 
+// Represents a tmux pane
 type Pane struct {
-	index       int
-	command     []map[string]interface{}
-	sessionName string
-	commands    []string
+	tmuxObject
+	index    int
+	commands []string
 }
 
+// Create a new Pane
 func NewPane() *Pane {
-	return &Pane{}
-}
-
-func (p *Pane) Setup(sessionName string) {
-	p.sessionName = sessionName
-	p.command = []map[string]interface{}{
-		{
-			"cmd": BASECOMMAND,
-			"args": []string{
-				"split-window",
-			},
+	return &Pane{
+		tmuxObject: tmuxObject{
+			tmuxCommand: command.NewPaneCommand(),
 		},
 	}
 }
@@ -36,26 +27,11 @@ func (p *Pane) AddCommand(cmd string) {
 	p.commands = append(p.commands, cmd)
 }
 
-// Creates a new tmux pane
+// Creates a new tmux pane and execute the pane commands
 func (p *Pane) Create() {
 	p.index = PANE_INDEX
 
-	for _, c := range p.command {
-		cmd := exec.Command(c["cmd"].(string), c["args"].([]string)...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	WINDOW_INDEX = 0
+	p.tmuxCommand.Execute()
 
 	p.shell(p.commands)
 
@@ -64,25 +40,6 @@ func (p *Pane) Create() {
 
 func (p *Pane) shell(commands []string) {
 	for _, cmd := range commands {
-		shell := []string{
-			"send-keys",
-			"-t",
-			p.sessionName,
-			cmd,
-			"c-m",
-		}
-
-		cmd := exec.Command("tmux", shell...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			fmt.Println(err)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			fmt.Println(err)
-		}
+		command.NewShellCommand(p.SessionName(), cmd).Execute()
 	}
 }
