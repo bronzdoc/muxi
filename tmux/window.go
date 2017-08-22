@@ -47,10 +47,17 @@ func (w *Window) Name() string {
 	return w.name
 }
 
-// Creates a new tmux window
+// Creates a new tmux window and its child panes
 func (w *Window) Create() {
 	w.tmuxCommand.Execute()
+	w.createPanes()
+}
 
+func (w *Window) SessionName() string {
+	return w.sessionName
+}
+
+func (w *Window) createPanes() {
 	if len(w.panes) != 0 {
 		firstIndex := 0
 		firstPane := w.panes[firstIndex]
@@ -61,10 +68,6 @@ func (w *Window) Create() {
 			p.Create()
 		}
 	}
-}
-
-func (w *Window) SessionName() string {
-	return w.sessionName
 }
 
 func (w *Window) shell(commands []string) {
