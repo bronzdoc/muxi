@@ -51,8 +51,10 @@ func (s *Session) Name() string {
 // Creates a new tmux session and its windows
 func (s *Session) Create() {
 	s.tmuxCommand.Execute()
+	s.createWindows()
+}
 
-	// Create session windows
+func (s *Session) createWindows() {
 	for _, w := range s.windows {
 		w.Create()
 	}
