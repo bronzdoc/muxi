@@ -26,7 +26,7 @@ func NewLayout(fileName string) *Layout {
 func (l *Layout) Create() error {
 	err := l.parse()
 	if err != nil {
-		return err
+		return fmt.Errorf("Parse error: %v", err)
 	}
 
 	l.tmuxSession.Create()
