@@ -1,8 +1,10 @@
 package tmux
 
 import (
-	"gopkg.in/yaml.v2"
+	"fmt"
 	"io/ioutil"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Represents a tmux layout
@@ -18,6 +20,18 @@ func NewLayout(fileName string) *Layout {
 		fileName:    fileName,
 		tmuxSession: NewSession(""),
 	}
+}
+
+// Creates a new tmux layout
+func (l *Layout) Create() error {
+	err := l.parse()
+	if err != nil {
+		return err
+	}
+
+	l.tmuxSession.Create()
+
+	return nil
 }
 
 func (l *Layout) parse() error {
@@ -38,36 +52,30 @@ func (l *Layout) parse() error {
 		tmuxWindow := NewWindow(windowName.(string))
 
 		if panes, ok := window.(map[interface{}]interface{})["panes"]; ok {
-			tmuxPane := NewPane()
+			for _, paneCommand := range panes.([]interface{}) {
+				switch pcType := paneCommand.(type) {
+				default:
+					return fmt.Errorf("Invalid pane command: %v", pcType)
+				case map[interface{}]interface{}: // Multiple commands for a pane
+					if commands, ok := paneCommand.(map[interface{}]interface{})["commands"]; ok {
+						tmuxPane := NewPane()
 
-			for _, pane := range panes.([]interface{}) {
-				if commands, ok := pane.(map[interface{}]interface{})["commands"]; ok {
-					for _, command := range commands.([]interface{}) {
-						tmuxPane.AddCommand(command.(string))
+						for _, command := range commands.([]interface{}) {
+							tmuxPane.AddCommand(command.(string))
+						}
+
+						tmuxWindow.AddPane(tmuxPane)
 					}
-				} else {
-					command := panes.([]interface{})[0]
-					tmuxPane.AddCommand(command.(string))
+				case string: // A single command for each pane
+					tmuxPane := NewPane()
+					tmuxPane.AddCommand(paneCommand.(string))
+					tmuxWindow.AddPane(tmuxPane)
 				}
 			}
-
-			tmuxWindow.AddPane(tmuxPane)
 		}
 
 		l.tmuxSession.AddWindow(tmuxWindow)
 	}
-
-	return nil
-}
-
-// Creates a new tmux layout
-func (l *Layout) Create() error {
-	err := l.parse()
-	if err != nil {
-		return err
-	}
-
-	l.tmuxSession.Create()
 
 	return nil
 }
