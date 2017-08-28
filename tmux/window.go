@@ -9,16 +9,18 @@ var WINDOW_INDEX = 0
 // Window Represents a tmux windows
 type Window struct {
 	tmuxObject
-	name  string
-	panes []*Pane
+	name   string
+	panes  []*Pane
+	layout string
 }
 
 // Create a new Window
-func NewWindow(name string) *Window {
+func NewWindow(name, layout string) *Window {
 	WINDOW_INDEX += 1
 
 	return &Window{
-		name: name,
+		name:   name,
+		layout: layout,
 		tmuxObject: tmuxObject{
 			tmuxCommand: command.NewWindowCommand(),
 		},
@@ -58,6 +60,9 @@ func (w *Window) createPanes() {
 			p.Create()
 		}
 	}
+
+	// Execute window layout
+	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) shell(commands []string) {
