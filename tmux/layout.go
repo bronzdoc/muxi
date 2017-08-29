@@ -48,14 +48,10 @@ func (l *Layout) parse() error {
 	windows := l.content["windows"]
 
 	for _, window := range windows {
-		windowName := window.(map[interface{}]interface{})["name"]
-		windowLayout := window.(map[interface{}]interface{})["layout"]
-		windowRootPath := window.(map[interface{}]interface{})["root"]
-
 		tmuxWindow := NewWindow(
-			windowName.(string),
-			windowLayout.(string),
-			windowRootPath.(string),
+			getWindowName(window),
+			getWindowLayout(window),
+			getWindowRoot(window),
 		)
 
 		if panes, ok := window.(map[interface{}]interface{})["panes"]; ok {
@@ -85,4 +81,30 @@ func (l *Layout) parse() error {
 	}
 
 	return nil
+}
+
+func getWindowName(context interface{}) string {
+	return getWindowField(context, "name")
+}
+
+func getWindowRoot(context interface{}) string {
+	return getWindowField(context, "root")
+}
+
+func getWindowLayout(context interface{}) string {
+	return getWindowField(context, "layout")
+}
+
+func getWindowField(context interface{}, field string) string {
+	switch context.(type) {
+	default:
+		return ""
+
+	case map[interface{}]interface{}:
+		if name, ok := context.(map[interface{}]interface{})[field]; ok {
+			return name.(string)
+		} else {
+			return ""
+		}
+	}
 }
