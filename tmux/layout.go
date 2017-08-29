@@ -50,8 +50,13 @@ func (l *Layout) parse() error {
 	for _, window := range windows {
 		windowName := window.(map[interface{}]interface{})["name"]
 		windowLayout := window.(map[interface{}]interface{})["layout"]
+		windowRootPath := window.(map[interface{}]interface{})["root"]
 
-		tmuxWindow := NewWindow(windowName.(string), windowLayout.(string))
+		tmuxWindow := NewWindow(
+			windowName.(string),
+			windowLayout.(string),
+			windowRootPath.(string),
+		)
 
 		if panes, ok := window.(map[interface{}]interface{})["panes"]; ok {
 			for _, paneCommand := range panes.([]interface{}) {
