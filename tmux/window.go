@@ -12,15 +12,17 @@ type Window struct {
 	name   string
 	panes  []*Pane
 	layout string
+	root   string
 }
 
 // Create a new Window
-func NewWindow(name, layout string) *Window {
+func NewWindow(name, layout, root string) *Window {
 	WINDOW_INDEX += 1
 
 	return &Window{
 		name:   name,
 		layout: layout,
+		root:   root,
 		tmuxObject: tmuxObject{
 			tmuxCommand: command.NewWindowCommand(),
 		},
