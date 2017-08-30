@@ -54,26 +54,24 @@ func (l *Layout) parse() error {
 			getWindowRoot(window),
 		)
 
-		if panes, ok := window.(map[interface{}]interface{})["panes"]; ok {
-			for _, paneCommand := range panes.([]interface{}) {
-				switch pcType := paneCommand.(type) {
-				default:
-					return fmt.Errorf("Invalid pane command: %v", pcType)
-				case map[interface{}]interface{}: // Multiple commands for a pane
-					if commands, ok := paneCommand.(map[interface{}]interface{})["commands"]; ok {
-						tmuxPane := NewPane()
-
-						for _, command := range commands.([]interface{}) {
-							tmuxPane.AddCommand(command.(string))
-						}
-
-						tmuxWindow.AddPane(tmuxPane)
-					}
-				case string: // A single command for each pane
+		for _, paneCommand := range getWindowPanes(window) {
+			switch pcType := paneCommand.(type) {
+			default:
+				return fmt.Errorf("Invalid pane command: %v", pcType)
+			case map[interface{}]interface{}: // Multiple commands for a pane
+				if commands, ok := paneCommand.(map[interface{}]interface{})["commands"]; ok {
 					tmuxPane := NewPane()
-					tmuxPane.AddCommand(paneCommand.(string))
+
+					for _, command := range commands.([]interface{}) {
+						tmuxPane.AddCommand(command.(string))
+					}
+
 					tmuxWindow.AddPane(tmuxPane)
 				}
+			case string: // A single command for each pane
+				tmuxPane := NewPane()
+				tmuxPane.AddCommand(paneCommand.(string))
+				tmuxWindow.AddPane(tmuxPane)
 			}
 		}
 
@@ -83,19 +81,36 @@ func (l *Layout) parse() error {
 	return nil
 }
 
+func getWindowPanes(context interface{}) []interface{} {
+	return getWindowSliceField(context, "panes")
+}
+
 func getWindowName(context interface{}) string {
-	return getWindowField(context, "name")
+	return getWindowStringField(context, "name")
 }
 
 func getWindowRoot(context interface{}) string {
-	return getWindowField(context, "root")
+	return getWindowStringField(context, "root")
 }
 
 func getWindowLayout(context interface{}) string {
-	return getWindowField(context, "layout")
+	return getWindowStringField(context, "layout")
 }
 
-func getWindowField(context interface{}, field string) string {
+func getWindowSliceField(context interface{}, fieldName string) []interface{} {
+	field := make([]interface{}, 0)
+
+	switch context.(type) {
+	case map[interface{}]interface{}:
+		if contextField, ok := context.(map[interface{}]interface{})[fieldName]; ok {
+			field = contextField.([]interface{})
+		}
+	}
+
+	return field
+}
+
+func getWindowStringField(context interface{}, field string) string {
 	switch context.(type) {
 	default:
 		return ""
