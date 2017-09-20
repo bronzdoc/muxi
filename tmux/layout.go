@@ -54,13 +54,15 @@ func (l *Layout) parse() error {
 			getWindowRoot(window),
 		)
 
+		l.tmuxSession.AddWindow(tmuxWindow)
+
 		for _, paneCommand := range getWindowPanes(window) {
 			switch pcType := paneCommand.(type) {
 			default:
 				return fmt.Errorf("Invalid pane command: %v", pcType)
 			case map[interface{}]interface{}: // Multiple commands for a pane
 				if commands, ok := paneCommand.(map[interface{}]interface{})["commands"]; ok {
-					tmuxPane := NewPane()
+					tmuxPane := NewPane(getWindowRoot(window))
 
 					for _, command := range commands.([]interface{}) {
 						tmuxPane.AddCommand(command.(string))
@@ -69,13 +71,12 @@ func (l *Layout) parse() error {
 					tmuxWindow.AddPane(tmuxPane)
 				}
 			case string: // A single command for each pane
-				tmuxPane := NewPane()
+				tmuxPane := NewPane(getWindowRoot(window))
 				tmuxPane.AddCommand(paneCommand.(string))
 				tmuxWindow.AddPane(tmuxPane)
 			}
 		}
 
-		l.tmuxSession.AddWindow(tmuxWindow)
 	}
 
 	return nil
