@@ -1,6 +1,8 @@
 package tmux
 
 import (
+	"fmt"
+
 	"github.com/bronzdoc/muxi/tmux/command"
 )
 
@@ -24,7 +26,10 @@ func NewWindow(name, layout, root string) *Window {
 		layout: layout,
 		root:   root,
 		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewWindowCommand(),
+			tmuxCommand: command.NewWindowCommand(
+				fmt.Sprintf("-n %s", name),
+				fmt.Sprintf("-c %s", root),
+			),
 		},
 	}
 }
@@ -49,6 +54,7 @@ func (w *Window) Name() string {
 func (w *Window) Create() {
 	w.tmuxCommand.Execute()
 	w.createPanes()
+	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) createPanes() {
@@ -62,9 +68,6 @@ func (w *Window) createPanes() {
 			p.Create()
 		}
 	}
-
-	// Execute window layout
-	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) shell(commands []string) {
