@@ -1,5 +1,7 @@
 package command
 
+import "fmt"
+
 type NewShell struct {
 	baseCommand
 }
@@ -12,7 +14,7 @@ func NewShellCommand(sessionName, cmd string) *NewShell {
 				"send-keys",
 				"-t",
 				sessionName,
-				cmd,
+				fmt.Sprintf("\"%s\"", cmd),
 				"c-m",
 			},
 		},

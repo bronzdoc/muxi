@@ -4,8 +4,8 @@ type NewWindow struct {
 	baseCommand
 }
 
-func NewWindowCommand() *NewWindow {
-	return &NewWindow{
+func NewWindowCommand(options ...string) *NewWindow {
+	w := NewWindow{
 		baseCommand: baseCommand{
 			cmd: TMUX,
 			args: []string{
@@ -13,4 +13,8 @@ func NewWindowCommand() *NewWindow {
 			},
 		},
 	}
+
+	w.args = append(w.args, options...)
+
+	return &w
 }

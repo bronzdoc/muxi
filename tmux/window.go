@@ -1,6 +1,8 @@
 package tmux
 
 import (
+	"fmt"
+
 	"github.com/bronzdoc/muxi/tmux/command"
 )
 
@@ -12,17 +14,22 @@ type Window struct {
 	name   string
 	panes  []*Pane
 	layout string
+	root   string
 }
 
 // Create a new Window
-func NewWindow(name, layout string) *Window {
+func NewWindow(name, layout, root string) *Window {
 	WINDOW_INDEX += 1
 
 	return &Window{
 		name:   name,
 		layout: layout,
+		root:   root,
 		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewWindowCommand(),
+			tmuxCommand: command.NewWindowCommand(
+				fmt.Sprintf("-n %s", name),
+				fmt.Sprintf("-c %s", root),
+			),
 		},
 	}
 }
@@ -47,6 +54,7 @@ func (w *Window) Name() string {
 func (w *Window) Create() {
 	w.tmuxCommand.Execute()
 	w.createPanes()
+	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) createPanes() {
@@ -60,9 +68,6 @@ func (w *Window) createPanes() {
 			p.Create()
 		}
 	}
-
-	// Execute window layout
-	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) shell(commands []string) {

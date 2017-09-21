@@ -4,8 +4,8 @@ type NewPane struct {
 	baseCommand
 }
 
-func NewPaneCommand() *NewPane {
-	return &NewPane{
+func NewPaneCommand(options ...string) *NewPane {
+	p := NewPane{
 		baseCommand: baseCommand{
 			cmd: TMUX,
 			args: []string{
@@ -13,4 +13,8 @@ func NewPaneCommand() *NewPane {
 			},
 		},
 	}
+
+	p.args = append(p.args, options...)
+
+	return &p
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"strings"
 )
 
 const TMUX = "tmux"
@@ -24,7 +25,11 @@ func (c *baseCommand) Execute() {
 		return
 	}
 
-	cmd := exec.Command(c.cmd, c.args...)
+	runShell(c.cmd, c.args)
+}
+
+func runShell(command string, args []string) {
+	cmd := exec.Command("sh", "-c", fmt.Sprintf("%s %s", command, strings.Join(args, " ")))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

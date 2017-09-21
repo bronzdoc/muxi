@@ -1,6 +1,8 @@
 package tmux
 
 import (
+	"fmt"
+
 	"github.com/bronzdoc/muxi/tmux/command"
 )
 
@@ -14,10 +16,12 @@ type Pane struct {
 }
 
 // Create a new Pane
-func NewPane() *Pane {
+func NewPane(root string) *Pane {
 	return &Pane{
 		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewPaneCommand(),
+			tmuxCommand: command.NewPaneCommand(
+				fmt.Sprintf("-c %s", root),
+			),
 		},
 	}
 }
