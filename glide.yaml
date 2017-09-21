@@ -4,3 +4,7 @@ import:
   subpackages:
   - cobra
 - package: gopkg.in/yaml.v2
+- package: github.com/onsi/ginkgo
+  version: ^1.4.0
+- package: github.com/onsi/gomega
+  version: ^1.2.0
