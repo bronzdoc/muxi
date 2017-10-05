@@ -54,7 +54,7 @@ func (w *Window) Name() string {
 func (w *Window) Create() {
 	w.tmuxCommand.Execute()
 	w.createPanes()
-	command.NewSelectLayoutCommand(w.layout).Execute()
+	w.selectLayout()
 }
 
 func (w *Window) createPanes() {
@@ -68,6 +68,10 @@ func (w *Window) createPanes() {
 			p.Create()
 		}
 	}
+}
+
+func (w *Window) selectLayout() {
+	command.NewSelectLayoutCommand(w.layout).Execute()
 }
 
 func (w *Window) shell(commands []string) {
