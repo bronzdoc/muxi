@@ -1,7 +1,7 @@
 package tmux
 
 import (
-	"github.com/bronzdoc/muxi/tmux/command"
+	"github.com/bronzdoc/muxi/command"
 )
 
 type AsTmuxObject interface {

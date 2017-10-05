@@ -11,7 +11,7 @@ import (
 const TMUX = "tmux"
 
 type TmuxCommand interface {
-	Execute()
+	Execute() error
 }
 
 type baseCommand struct {
@@ -19,26 +19,26 @@ type baseCommand struct {
 	args []string
 }
 
-func (c *baseCommand) Execute() {
+func (c *baseCommand) Execute() error {
 	if c.cmd == "" {
-		fmt.Printf("Execute is not implemented for %v", reflect.TypeOf(c))
-		return
+		return fmt.Errorf("Execute is not implemented for %v", reflect.TypeOf(c))
 	}
-
-	runShell(c.cmd, c.args)
+	return runShell(c.cmd, c.args)
 }
 
-func runShell(command string, args []string) {
+func runShell(command string, args []string) error {
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("%s %s", command, strings.Join(args, " ")))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
-		fmt.Println(err)
+		return fmt.Errorf("Error starting command %s", err)
 	}
 
 	if err := cmd.Wait(); err != nil {
-		fmt.Println(err)
+		return fmt.Errorf("Error waiting command: %s ", err)
 	}
+
+	return nil
 }

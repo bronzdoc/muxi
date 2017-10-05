@@ -3,7 +3,7 @@ package tmux
 import (
 	"fmt"
 
-	"github.com/bronzdoc/muxi/tmux/command"
+	"github.com/bronzdoc/muxi/command"
 )
 
 var PANE_INDEX = 0
