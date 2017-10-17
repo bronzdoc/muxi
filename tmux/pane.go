@@ -31,6 +31,10 @@ func (p *Pane) AddCommand(cmd string) {
 	p.commands = append(p.commands, cmd)
 }
 
+func (p *Pane) Commands() []string {
+	return p.commands
+}
+
 // Creates a new tmux pane and execute the pane commands
 func (p *Pane) Create() {
 	p.index = PANE_INDEX
