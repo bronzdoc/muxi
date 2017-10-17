@@ -4,14 +4,9 @@ import (
 	"github.com/bronzdoc/muxi/command"
 )
 
-type AsTmuxObject interface {
-	SetSessionName(string)
-	GetSessionName() string
-}
-
 type tmuxObject struct {
 	sessionName string
-	tmuxCommand command.TmuxCommand
+	tmuxCommand command.BaseCommand
 }
 
 func (t *tmuxObject) SetSessionName(sessionName string) {
@@ -20,4 +15,8 @@ func (t *tmuxObject) SetSessionName(sessionName string) {
 
 func (t *tmuxObject) SessionName() string {
 	return t.sessionName
+}
+
+func (t *tmuxObject) SetTmuxCommand(cmd command.BaseCommand) {
+	t.tmuxCommand = cmd
 }
