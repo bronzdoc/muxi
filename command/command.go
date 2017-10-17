@@ -4,26 +4,33 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"reflect"
 	"strings"
 )
 
-const TMUX = "tmux"
-
-type TmuxCommand interface {
-	Execute() error
+type BaseCommand interface {
+	Execute()
 }
 
-type baseCommand struct {
+type TmuxCommand struct {
 	cmd  string
 	args []string
 }
 
-func (c *baseCommand) Execute() error {
-	if c.cmd == "" {
-		return fmt.Errorf("Execute is not implemented for %v", reflect.TypeOf(c))
+func NewTmuxCommand(tmuxCommand string, args ...string) TmuxCommand {
+	t := TmuxCommand{
+		cmd:  "tmux",
+		args: []string{tmuxCommand},
 	}
-	return runShell(c.cmd, c.args)
+
+	t.args = append(t.args, args...)
+
+	return t
+}
+
+func (c *TmuxCommand) Execute() {
+	if err := runShell(c.cmd, c.args); err != nil {
+		fmt.Printf("Execute failded %v", err)
+	}
 }
 
 func runShell(command string, args []string) error {

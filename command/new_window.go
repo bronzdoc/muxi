@@ -1,20 +1,11 @@
 package command
 
 type NewWindow struct {
-	baseCommand
+	TmuxCommand
 }
 
 func NewWindowCommand(options ...string) *NewWindow {
-	w := NewWindow{
-		baseCommand: baseCommand{
-			cmd: TMUX,
-			args: []string{
-				"new-window",
-			},
-		},
+	return &NewWindow{
+		TmuxCommand: NewTmuxCommand("new-window", options...),
 	}
-
-	w.args = append(w.args, options...)
-
-	return &w
 }

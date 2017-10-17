@@ -1,20 +1,12 @@
 package command
 
 type NewPane struct {
-	baseCommand
+	TmuxCommand
 }
 
 func NewPaneCommand(options ...string) *NewPane {
-	p := NewPane{
-		baseCommand: baseCommand{
-			cmd: TMUX,
-			args: []string{
-				"split-window",
-			},
-		},
+	return &NewPane{
+		TmuxCommand: NewTmuxCommand("split-window", options...),
 	}
 
-	p.args = append(p.args, options...)
-
-	return &p
 }

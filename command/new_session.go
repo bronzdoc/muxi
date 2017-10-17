@@ -1,17 +1,11 @@
 package command
 
-type NewSession struct {
-	baseCommand
+type newSessionCommand struct {
+	TmuxCommand
 }
 
-func NewSessionCommand(sessionName string) *NewSession {
-	return &NewSession{
-		baseCommand: baseCommand{
-			cmd: TMUX,
-			args: []string{
-				"rename-session",
-				sessionName,
-			},
-		},
+func NewSessionCommand(sessionName string) *newSessionCommand {
+	return &newSessionCommand{
+		TmuxCommand: NewTmuxCommand("rename-session", sessionName),
 	}
 }
