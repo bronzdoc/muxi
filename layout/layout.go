@@ -11,6 +11,7 @@ import (
 type Layout struct {
 	fileName    string
 	content     map[string][]interface{}
+	rawContent  []byte
 	TmuxSession *tmux.Session
 }
 
@@ -32,15 +33,22 @@ func (l *Layout) Content() map[string][]interface{} {
 	return l.content
 }
 
+// Gets a muxi layout content
+func (l *Layout) RawContent() []byte {
+	return l.rawContent
+}
+
 // Parses a muxi Layout
 func (l *Layout) Parse() error {
-	yamlFile, err := ioutil.ReadFile(l.fileName)
+	yamlFileContent, err := ioutil.ReadFile(l.fileName)
 
 	if err != nil {
 		return err
 	}
 
-	err = yaml.Unmarshal(yamlFile, &l.content)
+	l.rawContent = yamlFileContent
+
+	err = yaml.Unmarshal(yamlFileContent, &l.content)
 
 	if err != nil {
 		return err

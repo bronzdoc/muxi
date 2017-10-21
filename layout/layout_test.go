@@ -48,6 +48,29 @@ windows:
 		})
 	})
 
+	Describe("RawContent", func() {
+		It("should show layout raw content", func() {
+			tmux_template_content := []byte(`---
+windows:
+  - name: test
+    root: /tmp
+    layout: tiled
+    panes:
+      - ls -liah
+      - env
+      - echo "jar jar binks"
+      - vim test.yml
+ `)
+
+			tmux_template_file := "/tmp/test.yml"
+			ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
+			layout := NewLayout(tmux_template_file)
+			layout.Parse()
+
+			Expect(layout.RawContent()).To(Equal(tmux_template_content))
+		})
+	})
+
 	Describe("Create", func() {
 		It("should create a muxi layout", func() {
 			mockCommand := command.NewFakeCommand("options")
