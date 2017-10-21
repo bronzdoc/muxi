@@ -9,11 +9,14 @@ import (
 
 type BaseCommand interface {
 	Execute()
+	PostHooks() []func()
+	AddPostHook(func())
 }
 
 type TmuxCommand struct {
-	cmd  string
-	args []string
+	cmd       string
+	args      []string
+	postHooks []func()
 }
 
 func NewTmuxCommand(tmuxCommand string, args ...string) TmuxCommand {
@@ -31,6 +34,18 @@ func (c *TmuxCommand) Execute() {
 	if err := runShell(c.cmd, c.args); err != nil {
 		fmt.Printf("Execute failded %v", err)
 	}
+
+	for _, postHook := range c.postHooks {
+		postHook()
+	}
+}
+
+func (c *TmuxCommand) AddPostHook(hook func()) {
+	c.postHooks = append(c.postHooks, hook)
+}
+
+func (c *TmuxCommand) PostHooks() []func() {
+	return c.postHooks
 }
 
 func runShell(command string, args []string) error {
