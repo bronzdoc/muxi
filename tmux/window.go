@@ -21,17 +21,24 @@ type Window struct {
 func NewWindow(name, layout, root string) *Window {
 	WINDOW_INDEX += 1
 
-	return &Window{
-		name:   name,
-		layout: layout,
-		root:   root,
-		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewWindowCommand(
-				fmt.Sprintf("-n %s", name),
-				fmt.Sprintf("-c %s", root),
-			),
-		},
+	w := Window{
+		name:       name,
+		layout:     layout,
+		root:       root,
+		tmuxObject: tmuxObject{},
 	}
+
+	w.SetTmuxCommand(
+		command.NewWindowCommand(
+			fmt.Sprintf("-n %s", name),
+			fmt.Sprintf("-c %s", root),
+		),
+	)
+
+	w.tmuxCommand.AddPostHook(w.createPanes)
+	w.tmuxCommand.AddPostHook(w.selectLayout)
+
+	return &w
 }
 
 // Get window panes
@@ -53,8 +60,6 @@ func (w *Window) Name() string {
 // Creates a new tmux window and its child panes
 func (w *Window) Create() {
 	w.tmuxCommand.Execute()
-	w.createPanes()
-	w.selectLayout()
 }
 
 func (w *Window) createPanes() {
