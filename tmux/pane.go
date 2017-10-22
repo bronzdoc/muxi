@@ -3,7 +3,7 @@ package tmux
 import (
 	"fmt"
 
-	"github.com/bronzdoc/muxi/tmux/command"
+	"github.com/bronzdoc/muxi/command"
 )
 
 var PANE_INDEX = 0
@@ -17,18 +17,24 @@ type Pane struct {
 
 // Create a new Pane
 func NewPane(root string) *Pane {
-	return &Pane{
-		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewPaneCommand(
-				fmt.Sprintf("-c %s", root),
-			),
-		},
-	}
+	p := Pane{}
+
+	p.SetTmuxCommand(
+		command.NewPaneCommand(fmt.Sprintf("-c %s", root)),
+	)
+
+	p.tmuxCommand.AddPostHook(p.shell)
+
+	return &p
 }
 
 // Adds a new command to execute in pane
 func (p *Pane) AddCommand(cmd string) {
 	p.commands = append(p.commands, cmd)
+}
+
+func (p *Pane) Commands() []string {
+	return p.commands
 }
 
 // Creates a new tmux pane and execute the pane commands
@@ -37,13 +43,11 @@ func (p *Pane) Create() {
 
 	p.tmuxCommand.Execute()
 
-	p.shell(p.commands)
-
 	PANE_INDEX += 1
 }
 
-func (p *Pane) shell(commands []string) {
-	for _, cmd := range commands {
+func (p *Pane) shell() {
+	for _, cmd := range p.commands {
 		command.NewShellCommand(p.SessionName(), cmd).Execute()
 	}
 }

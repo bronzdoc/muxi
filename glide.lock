@@ -1,10 +1,14 @@
-hash: ac76ff6118d5fcba4f30ed5a2b837af4fb994ec4d0b2a4b35aa3424067b3b45a
-updated: 2017-08-23T10:57:58.598822938-06:00
+hash: fd91d6c643b765773335ac86a8b27ecab9fb941a7839333d9b41ce5a4cc31863
+updated: 2017-09-20T18:35:20.064490123-06:00
 imports:
+- name: github.com/onsi/ginkgo
+  version: 9eda700730cba42af70d53180f9dcce9266bc2bc
+- name: github.com/onsi/gomega
+  version: c893efa28eb45626cdaa76c9f653b62488858837
 - name: github.com/spf13/cobra
   version: 7b1b6e8dc027253d45fc029bc269d1c019f83a34
   subpackages:
   - cobra
 - name: gopkg.in/yaml.v2
-  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

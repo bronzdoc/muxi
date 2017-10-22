@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/bronzdoc/muxi/tmux/command"
+	"github.com/bronzdoc/muxi/command"
 )
 
 // Represents a tmux session
@@ -24,12 +24,19 @@ func NewSession(name string) *Session {
 		newName = fmt.Sprintf("%d", randInt)
 	}
 
-	return &Session{
+	s := Session{
 		tmuxObject: tmuxObject{
-			tmuxCommand: command.NewSessionCommand(newName),
 			sessionName: newName,
 		},
 	}
+
+	s.SetTmuxCommand(
+		command.NewSessionCommand(newName),
+	)
+
+	s.tmuxCommand.AddPostHook(s.createWindows)
+
+	return &s
 }
 
 // Adds windows to the session
@@ -51,7 +58,6 @@ func (s *Session) Name() string {
 // Creates a new tmux session and its windows
 func (s *Session) Create() {
 	s.tmuxCommand.Execute()
-	s.createWindows()
 }
 
 func (s *Session) createWindows() {
