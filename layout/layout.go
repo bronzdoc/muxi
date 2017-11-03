@@ -47,7 +47,7 @@ func (l *Layout) RawContent() []byte {
 	return l.rawContent
 }
 
-func (l *Layout) Edit(layoutName string) error {
+func Edit(layoutName string) error {
 	editor := os.Getenv("EDITOR")
 
 	if editor == "" {
