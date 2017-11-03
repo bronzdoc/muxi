@@ -92,10 +92,14 @@ func List() (list []string) {
 
 // Parses a muxi Layout
 func (l *Layout) Parse() error {
-	yamlFileContent, err := ioutil.ReadFile(l.fileName)
-
+	layoutPath, err := getLayoutPath(l.fileName)
 	if err != nil {
-		return err
+		return fmt.Errorf("Layout not found: %s", err)
+	}
+
+	yamlFileContent, err := ioutil.ReadFile(layoutPath)
+	if err != nil {
+		return fmt.Errorf("Can't read layout: %s", err)
 	}
 
 	l.rawContent = yamlFileContent
