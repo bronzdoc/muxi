@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 
 	"github.com/bronzdoc/muxi/tmux"
 	"github.com/spf13/viper"
@@ -72,6 +73,21 @@ func (l *Layout) Edit(layoutName string) error {
 	}
 
 	return nil
+}
+
+// List muxi layouts
+func List() (list []string) {
+	layoutsPath := viper.GetString("layoutsPath")
+	files, _ := ioutil.ReadDir(layoutsPath)
+	for _, f := range files {
+		// List only files with yaml or yml extension
+		hasValidExtension, _ := regexp.MatchString("(.yml|.yaml)", f.Name())
+		if hasValidExtension {
+			list = append(list, f.Name())
+		}
+	}
+
+	return
 }
 
 // Parses a muxi Layout
