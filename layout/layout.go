@@ -2,10 +2,18 @@ package layout
 
 import (
 	"fmt"
-	"github.com/bronzdoc/muxi/tmux"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"os/exec"
+
+	"github.com/bronzdoc/muxi/tmux"
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
+
+// ExecCommand allows to Have higher control of exec.Command,
+// and will allow us to mock it easier in tests...
+var ExecCommand = exec.Command
 
 // Represents a muxi layout
 type Layout struct {
@@ -36,6 +44,34 @@ func (l *Layout) Content() map[string][]interface{} {
 // Gets a muxi layout content
 func (l *Layout) RawContent() []byte {
 	return l.rawContent
+}
+
+func (l *Layout) Edit(layoutName string) error {
+	editor := os.Getenv("EDITOR")
+
+	if editor == "" {
+		return fmt.Errorf(`$EDITOR is empty, could not edit "%s" layout`, layoutName)
+	}
+
+	layoutPath, err := getLayoutPath(layoutName)
+	if err != nil {
+		return fmt.Errorf("Layout not found: %s", err)
+	}
+
+	cmd := ExecCommand(editor, layoutPath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Parses a muxi Layout
@@ -131,4 +167,29 @@ func getWindowStringField(context interface{}, field string) string {
 			return ""
 		}
 	}
+}
+
+func layoutExists(layoutPath string) bool {
+	_, err := os.Stat(layoutPath)
+	return !os.IsNotExist(err) // negate the bool so the functions makes sense...
+}
+
+func getLayoutPath(layoutName string) (string, error) {
+	yamlFile := getLayoutWithExtension(layoutName, "yaml")
+	ymlFile := getLayoutWithExtension(layoutName, "yml")
+
+	if layoutExists(yamlFile) {
+		return yamlFile, nil
+	} else if layoutExists(ymlFile) {
+		return ymlFile, nil
+	}
+
+	return "", fmt.Errorf(`layout "%s" doesn't exists`, layoutName)
+}
+func getLayoutWithExtension(layoutName, extension string) string {
+	return fmt.Sprintf(
+		"%s/%s",
+		viper.GetString("layoutsPath"),
+		fmt.Sprintf("%s.%s", layoutName, extension),
+	)
 }
