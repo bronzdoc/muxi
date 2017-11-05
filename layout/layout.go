@@ -20,12 +20,11 @@ var ExecCommand = exec.Command
 type Layout struct {
 	fileName    string
 	content     map[string][]interface{}
-	rawContent  []byte
 	TmuxSession *tmux.Session
 }
 
 // Creates a new muxi layout from a yaml file
-func NewLayout(fileName string) *Layout {
+func New(fileName string) *Layout {
 	return &Layout{
 		fileName:    fileName,
 		TmuxSession: tmux.NewSession(""),
@@ -43,8 +42,8 @@ func (l *Layout) Content() map[string][]interface{} {
 }
 
 // Gets a muxi layout content
-func (l *Layout) RawContent() []byte {
-	return l.rawContent
+func (l *Layout) RawContent() ([]byte, error) {
+	return getLayoutContent(l.fileName)
 }
 
 func Edit(layoutName string) error {
@@ -56,7 +55,7 @@ func Edit(layoutName string) error {
 
 	layoutPath, err := getLayoutPath(layoutName)
 	if err != nil {
-		return fmt.Errorf("Layout not found: %s", err)
+		return fmt.Errorf("layout not found: %s", err)
 	}
 
 	cmd := ExecCommand(editor, layoutPath)
@@ -92,17 +91,11 @@ func List() (list []string) {
 
 // Parses a muxi Layout
 func (l *Layout) Parse() error {
-	layoutPath, err := getLayoutPath(l.fileName)
-	if err != nil {
-		return fmt.Errorf("Layout not found: %s", err)
-	}
 
-	yamlFileContent, err := ioutil.ReadFile(layoutPath)
+	yamlFileContent, err := getLayoutContent(l.fileName)
 	if err != nil {
-		return fmt.Errorf("Can't read layout: %s", err)
+		return fmt.Errorf("parse: %s\n", err)
 	}
-
-	l.rawContent = yamlFileContent
 
 	err = yaml.Unmarshal(yamlFileContent, &l.content)
 
@@ -177,16 +170,16 @@ func getWindowSliceField(context interface{}, fieldName string) []interface{} {
 
 func getWindowStringField(context interface{}, field string) string {
 	switch context.(type) {
-	default:
-		return ""
-
 	case map[interface{}]interface{}:
 		if name, ok := context.(map[interface{}]interface{})[field]; ok {
-			return name.(string)
-		} else {
-			return ""
+			switch name.(type) {
+			case string:
+				return name.(string)
+			}
 		}
 	}
+
+	return ""
 }
 
 func layoutExists(layoutPath string) bool {
@@ -206,10 +199,25 @@ func getLayoutPath(layoutName string) (string, error) {
 
 	return "", fmt.Errorf(`layout "%s" doesn't exists`, layoutName)
 }
+
 func getLayoutWithExtension(layoutName, extension string) string {
 	return fmt.Sprintf(
 		"%s/%s",
 		viper.GetString("layoutsPath"),
 		fmt.Sprintf("%s.%s", layoutName, extension),
 	)
+}
+
+func getLayoutContent(layoutName string) ([]byte, error) {
+	layoutPath, err := getLayoutPath(layoutName)
+	if err != nil {
+		return []byte{}, fmt.Errorf("layout not found: %s", err)
+	}
+
+	yamlFileContent, err := ioutil.ReadFile(layoutPath)
+	if err != nil {
+		return []byte{}, fmt.Errorf("can't read layout: %s", err)
+	}
+
+	return yamlFileContent, nil
 }
