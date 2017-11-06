@@ -156,16 +156,17 @@ func getWindowLayout(context interface{}) string {
 }
 
 func getWindowSliceField(context interface{}, fieldName string) []interface{} {
-	field := make([]interface{}, 0)
-
 	switch context.(type) {
 	case map[interface{}]interface{}:
 		if contextField, ok := context.(map[interface{}]interface{})[fieldName]; ok {
-			field = contextField.([]interface{})
+			switch contextField.(type) {
+			case []interface{}:
+				return contextField.([]interface{})
+			}
 		}
 	}
 
-	return field
+	return make([]interface{}, 0)
 }
 
 func getWindowStringField(context interface{}, field string) string {
