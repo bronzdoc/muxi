@@ -20,3 +20,10 @@ func (t *tmuxObject) SessionName() string {
 func (t *tmuxObject) SetTmuxCommand(cmd command.BaseCommand) {
 	t.tmuxCommand = cmd
 }
+
+func rootIsEmpty(root string) bool {
+	if root != "" {
+		return false
+	}
+	return true
+}
