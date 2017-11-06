@@ -62,7 +62,7 @@ windows:
 			Expect(window_keys["panes"].([]interface{})[3]).To(Equal("vim test.yml"))
 		})
 
-		Context("when no root given", func() {
+		Context("when root is empty", func() {
 			It("should add the correct default", func() {
 				tmux_template_content := []byte(`---
 windows:
@@ -70,15 +70,68 @@ windows:
     root:
     layout: tiled
     panes:
-      - ls -liah
       - env
-      - echo "jar jar binks"
-      - vim test.yml
  `)
 
-				tmux_template_file := fmt.Sprintf("%s/test_no_root.yml", MUXI_LAYOUTS_PATH)
+				tmux_template_file := fmt.Sprintf("%s/test_empty_name.yml", MUXI_LAYOUTS_PATH)
 				ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
-				layout := New("test_no_root")
+				layout := New("test_empty_name")
+				err := layout.Parse()
+
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("when name is empty", func() {
+			It("should add the correct default", func() {
+				tmux_template_content := []byte(`---
+windows:
+  - name:
+    root: /tmp
+    layout: tiled
+    panes:
+      - env
+ `)
+				tmux_template_file := fmt.Sprintf("%s/test_empty_name.yml", MUXI_LAYOUTS_PATH)
+				ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
+				layout := New("test_empty_name")
+				err := layout.Parse()
+
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("when layout is empty", func() {
+			It("should add the correct default", func() {
+				tmux_template_content := []byte(`---
+windows:
+  - name: test
+    root: /tmp
+    layout:
+    panes:
+      - env
+ `)
+				tmux_template_file := fmt.Sprintf("%s/test_empty_layout.yml", MUXI_LAYOUTS_PATH)
+				ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
+				layout := New("test_empty_layout")
+				err := layout.Parse()
+
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("when panes is empty", func() {
+			It("should add the correct default", func() {
+				tmux_template_content := []byte(`---
+windows:
+  - name: test
+    root: /tmp
+    layout:
+    panes:
+ `)
+				tmux_template_file := fmt.Sprintf("%s/test_empty_panes.yml", MUXI_LAYOUTS_PATH)
+				ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
+				layout := New("test_empty_panes")
 				err := layout.Parse()
 
 				Expect(err).To(BeNil())
