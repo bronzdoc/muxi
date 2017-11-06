@@ -29,14 +29,19 @@ func NewWindow(name, layout, root string) *Window {
 	}
 
 	windowRoot := root
+	windowName := name
 
-	if !rootIsEmpty(root) {
+	if !IsEmpty(root) {
 		windowRoot = fmt.Sprintf("-c %s", root)
+	}
+
+	if !IsEmpty(name) {
+		windowName = fmt.Sprintf("-n %s", name)
 	}
 
 	w.SetTmuxCommand(
 		command.NewWindowCommand(
-			fmt.Sprintf("-n %s", name),
+			windowName,
 			windowRoot,
 		),
 	)

@@ -21,7 +21,7 @@ func NewPane(root string) *Pane {
 
 	paneRoot := root
 
-	if !rootIsEmpty(root) {
+	if !IsEmpty(root) {
 		paneRoot = fmt.Sprintf("-c %s", root)
 	}
 

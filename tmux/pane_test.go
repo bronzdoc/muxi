@@ -34,6 +34,12 @@ var _ = Describe("Pane", func() {
 
 			Expect(mockCommand.ExecuteCalled).To(Equal(true))
 		})
-	})
 
+		Context("when no root given", func() {
+			It("should not add the -c option to the tmux command", func() {
+				paneCommand := NewPane("").GetTmuxCommand()
+				Expect(paneCommand.Options()).To(Equal([]string{""}))
+			})
+		})
+	})
 })
