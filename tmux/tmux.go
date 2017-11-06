@@ -21,8 +21,12 @@ func (t *tmuxObject) SetTmuxCommand(cmd command.BaseCommand) {
 	t.tmuxCommand = cmd
 }
 
-func rootIsEmpty(root string) bool {
-	if root != "" {
+func (t *tmuxObject) GetTmuxCommand() command.BaseCommand {
+	return t.tmuxCommand
+}
+
+func IsEmpty(field string) bool {
+	if field != "" {
 		return false
 	}
 	return true
