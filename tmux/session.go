@@ -3,6 +3,7 @@ package tmux
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/bronzdoc/muxi/command"
 )
@@ -16,12 +17,11 @@ type Session struct {
 // Creates a new Session
 func NewSession(name string) *Session {
 	newName := name
-	const RANDSOURCE = 100000
 
 	// Generate tmux session name if not given
 	if newName == "" {
-		randInt := rand.Intn(RANDSOURCE)
-		newName = fmt.Sprintf("%d", randInt)
+		rand.Seed(int64(time.Now().Nanosecond()))
+		newName = fmt.Sprintf("%d", rand.Int())
 	}
 
 	s := Session{
