@@ -31,6 +31,7 @@ var _ = Describe("Layout", func() {
 		It("Should parse the tmux layout definition correctly", func() {
 
 			tmux_template_content := []byte(`---
+name: my-session-name
 windows:
   - name: test
     root: /tmp
@@ -50,8 +51,11 @@ windows:
 			Expect(err).To(BeNil())
 
 			layout_content := layout.Content()
-			window_keys := layout_content["windows"][0].(map[interface{}]interface{})
 
+			session_name := layout_content["name"]
+			window_keys := layout_content["windows"].([]interface{})[0].(map[interface{}]interface{})
+
+			Expect(session_name).To(Equal("my-session-name"))
 			Expect(window_keys["name"]).To(Equal("test"))
 			Expect(window_keys["root"]).To(Equal("/tmp"))
 			Expect(window_keys["layout"]).To(Equal("tiled"))
@@ -60,6 +64,30 @@ windows:
 			Expect(window_keys["panes"].([]interface{})[1]).To(Equal("env"))
 			Expect(window_keys["panes"].([]interface{})[2]).To(Equal("echo \"jar jar binks\""))
 			Expect(window_keys["panes"].([]interface{})[3]).To(Equal("vim test.yml"))
+		})
+
+		Context("when session name is empty", func() {
+			It("should add the correct default", func() {
+				tmux_template_content := []byte(`---
+name:
+windows:
+  - name: test
+    root: /tmp
+    layout: tiled
+    panes:
+      - ls -liah
+      - env
+      - echo "jar jar binks"
+      - vim test.yml
+ `)
+
+				tmux_template_file := fmt.Sprintf("%s/test_empty_session_name.yml", MUXI_LAYOUTS_PATH)
+				ioutil.WriteFile(tmux_template_file, tmux_template_content, 0777)
+				layout := New("test_empty_session_name")
+				err := layout.Parse()
+
+				Expect(err).To(BeNil())
+			})
 		})
 
 		Context("when root is empty", func() {

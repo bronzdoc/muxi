@@ -19,15 +19,14 @@ var ExecCommand = exec.Command
 // Represents a muxi layout
 type Layout struct {
 	fileName    string
-	content     map[string][]interface{}
+	content     map[string]interface{}
 	TmuxSession *tmux.Session
 }
 
 // Creates a new muxi layout from a yaml file
 func New(fileName string) *Layout {
 	return &Layout{
-		fileName:    fileName,
-		TmuxSession: tmux.NewSession(""),
+		fileName: fileName,
 	}
 }
 
@@ -37,7 +36,7 @@ func (l *Layout) Create() {
 }
 
 // Gets a muxi layout content
-func (l *Layout) Content() map[string][]interface{} {
+func (l *Layout) Content() map[string]interface{} {
 	return l.content
 }
 
@@ -91,19 +90,19 @@ func List() (list []string) {
 
 // Parses a muxi Layout
 func (l *Layout) Parse() error {
-
 	yamlFileContent, err := getLayoutContent(l.fileName)
 	if err != nil {
 		return fmt.Errorf("parse: %s\n", err)
 	}
 
 	err = yaml.Unmarshal(yamlFileContent, &l.content)
-
 	if err != nil {
 		return err
 	}
 
-	windows := l.content["windows"]
+	l.TmuxSession = tmux.NewSession(getSessionName(l.content))
+
+	windows := l.content["windows"].([]interface{})
 
 	for _, window := range windows {
 		tmuxWindow := tmux.NewWindow(
@@ -139,6 +138,9 @@ func (l *Layout) Parse() error {
 	return nil
 }
 
+func getSessionName(context interface{}) string {
+	return getSessionStringField(context, "name")
+}
 func getWindowPanes(context interface{}) []interface{} {
 	return getWindowSliceField(context, "panes")
 }
@@ -153,6 +155,20 @@ func getWindowRoot(context interface{}) string {
 
 func getWindowLayout(context interface{}) string {
 	return getWindowStringField(context, "layout")
+}
+
+func getSessionStringField(context interface{}, field string) string {
+	switch context.(type) {
+	case map[string]interface{}:
+		if name, ok := context.(map[string]interface{})[field]; ok {
+			switch name.(type) {
+			case string:
+				return name.(string)
+			}
+		}
+	}
+
+	return ""
 }
 
 func getWindowSliceField(context interface{}, fieldName string) []interface{} {
