@@ -17,7 +17,6 @@ var _ = Describe("Window", func() {
 
 		window = NewWindow("test-window", "default", "")
 		window.SetTmuxCommand(mockCommand)
-
 	})
 
 	Describe("AddPane", func() {
@@ -36,10 +35,23 @@ var _ = Describe("Window", func() {
 	})
 
 	Describe("Create", func() {
-		It("Create a new tmux window", func() {
+		It("create a new tmux window", func() {
 			window.Create()
-
 			Expect(mockCommand.ExecuteCalled).To(Equal(true))
+		})
+
+		Context("when no name given", func() {
+			It("should not add the -n option to the tmux command", func() {
+				windowCommand := NewWindow("", "default", "/tmp").GetTmuxCommand()
+				Expect(windowCommand.Options()).To(Equal([]string{"", "-c /tmp"}))
+			})
+		})
+
+		Context("when no root given", func() {
+			It("should not add the -c option to the tmux command", func() {
+				windowCommand := NewWindow("my-new-window", "default", "").GetTmuxCommand()
+				Expect(windowCommand.Options()).To(Equal([]string{"-n my-new-window", ""}))
+			})
 		})
 	})
 })

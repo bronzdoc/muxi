@@ -19,8 +19,14 @@ type Pane struct {
 func NewPane(root string) *Pane {
 	p := Pane{}
 
+	paneRoot := root
+
+	if !IsEmpty(root) {
+		paneRoot = fmt.Sprintf("-c %s", root)
+	}
+
 	p.SetTmuxCommand(
-		command.NewPaneCommand(fmt.Sprintf("-c %s", root)),
+		command.NewPaneCommand(paneRoot),
 	)
 
 	p.tmuxCommand.AddPostHook(p.shell)
