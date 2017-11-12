@@ -24,6 +24,7 @@ var startCmd = &cobra.Command{
 
 		if err := muxiLayout.Parse(); err != nil {
 			fmt.Printf("muxi: %s", err)
+			os.Exit(1)
 		}
 
 		muxiLayout.Create()

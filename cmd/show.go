@@ -26,6 +26,7 @@ var showCmd = &cobra.Command{
 
 		if err != nil {
 			fmt.Printf("muxi: %s", err)
+			os.Exit(1)
 		}
 
 		fmt.Println(string(layoutContent))

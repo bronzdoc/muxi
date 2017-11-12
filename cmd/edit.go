@@ -22,6 +22,7 @@ var editCmd = &cobra.Command{
 
 		if err := layout.Edit(layoutName); err != nil {
 			fmt.Printf("muxi: %s\n", err)
+			os.Exit(1)
 		}
 	},
 }
