@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/bronzdoc/muxi/layout"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -24,7 +25,7 @@ var startCmd = &cobra.Command{
 		muxiLayout := layout.New(layoutName)
 
 		if err := muxiLayout.Parse(); err != nil {
-			fmt.Printf("muxi: %s", err)
+			fmt.Printf("muxi: %s\n", err)
 			os.Exit(1)
 		}
 

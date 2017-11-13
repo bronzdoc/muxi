@@ -1,10 +1,14 @@
 package command
 
 import (
+	"bytes"
 	"fmt"
-	"os"
+	"io"
 	"os/exec"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/pkg/errors"
 )
 
 type BaseCommand interface {
@@ -19,6 +23,9 @@ type TmuxCommand struct {
 	cmdOptions []string
 	options    []string
 	postHooks  []func()
+	Stdin      io.Reader
+	Stdout     bytes.Buffer
+	Stderr     bytes.Buffer
 }
 
 func NewTmuxCommand(tmuxCommand string, options ...string) TmuxCommand {
@@ -34,8 +41,8 @@ func NewTmuxCommand(tmuxCommand string, options ...string) TmuxCommand {
 }
 
 func (c *TmuxCommand) Execute() {
-	if err := runShell(c.cmd, c.cmdOptions); err != nil {
-		fmt.Printf("Execute failded %v", err)
+	if err := c.runShell(c.cmd, c.cmdOptions); err != nil {
+		fmt.Printf("Execute failded: %v\n", err)
 	}
 
 	for _, postHook := range c.postHooks {
@@ -54,18 +61,24 @@ func (c *TmuxCommand) Options() []string {
 	return c.options
 }
 
-func runShell(command string, cmdOptions []string) error {
-	cmd := exec.Command("sh", "-c", fmt.Sprintf("%s %s", command, strings.Join(cmdOptions, " ")))
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+func (c *TmuxCommand) runShell(command string, cmdOptions []string) error {
+	internalCommand := "sh"
+	internalCommandFlags := "-c"
+	commandToExecute := fmt.Sprintf("%s %s", command, strings.Join(cmdOptions, " "))
+	completeCommandString := fmt.Sprintf("%s %s %s", internalCommand, internalCommandFlags, commandToExecute)
+
+	cmd := exec.Command(internalCommand, internalCommandFlags, commandToExecute)
+	cmd.Stdout = &c.Stdout
+	cmd.Stderr = &c.Stderr
+
+	red := color.New(color.FgRed).SprintFunc()
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("Error starting command %s", err)
+		return errors.Wrapf(err, `could not start command %s`, completeCommandString)
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("Error waiting command: %s ", err)
+		return errors.Wrapf(err, `command %s finished with errors: %s`, red(completeCommandString), red(c.Stderr.String()))
 	}
 
 	return nil

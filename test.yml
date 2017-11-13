@@ -1,0 +1,11 @@
+windows:
+  - name: sample-three-panes
+    root: ~/.dotfiles
+    layout: main-vertical
+    panes:
+      - vim
+      - commands:
+        - git log
+        - git status
+      - rails server
+
