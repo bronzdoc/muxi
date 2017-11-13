@@ -4,13 +4,15 @@ import (
 	"fmt"
 
 	"github.com/bronzdoc/muxi/command"
+	"github.com/spf13/viper"
 )
 
-var WINDOW_INDEX = 0
+var WINDOW_COUNT = 0
 
 // Window Represents a tmux windows
 type Window struct {
 	tmuxObject
+	index  int
 	name   string
 	panes  []*Pane
 	layout string
@@ -19,35 +21,40 @@ type Window struct {
 
 // Create a new Window
 func NewWindow(name, layout, root string) *Window {
-	WINDOW_INDEX += 1
-
 	w := Window{
+		index:      WINDOW_COUNT,
 		name:       name,
 		layout:     layout,
 		root:       root,
 		tmuxObject: tmuxObject{},
 	}
 
-	windowRoot := root
-	windowName := name
+	if viper.GetBool("here") && w.isFirst() {
+		w.SetTmuxCommand(command.CurrentWindowCommand())
+	} else {
+		windowRoot := root
+		windowName := name
 
-	if !IsEmpty(root) {
-		windowRoot = fmt.Sprintf("-c %s", root)
+		if !IsEmpty(root) {
+			windowRoot = fmt.Sprintf("-c %s", root)
+		}
+
+		if !IsEmpty(name) {
+			windowName = fmt.Sprintf("-n %s", name)
+		}
+
+		w.SetTmuxCommand(
+			command.NewWindowCommand(
+				windowName,
+				windowRoot,
+			),
+		)
 	}
-
-	if !IsEmpty(name) {
-		windowName = fmt.Sprintf("-n %s", name)
-	}
-
-	w.SetTmuxCommand(
-		command.NewWindowCommand(
-			windowName,
-			windowRoot,
-		),
-	)
 
 	w.tmuxCommand.AddPostHook(w.createPanes)
 	w.tmuxCommand.AddPostHook(w.selectLayout)
+
+	WINDOW_COUNT += 1
 
 	return &w
 }
@@ -94,4 +101,8 @@ func (w *Window) shell(commands []string) {
 	for _, cmd := range commands {
 		command.NewShellCommand(w.SessionName(), cmd).Execute()
 	}
+}
+
+func (w *Window) isFirst() bool {
+	return w.index == 0
 }
