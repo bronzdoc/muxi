@@ -6,6 +6,7 @@ import (
 
 	"github.com/bronzdoc/muxi/layout"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // startCmd represents the start command
@@ -42,6 +43,9 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// startCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	startCmd.Flags().BoolP("here", "", false, "Start the muxi layout in the current window")
+
+	// Bind the flag to a viper key, so we can access the flag in other parts of the code
+	viper.BindPFlag("here", startCmd.Flags().Lookup("here"))
 
 }
