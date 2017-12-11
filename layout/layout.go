@@ -8,7 +8,9 @@ import (
 	"regexp"
 
 	"github.com/bronzdoc/muxi/tmux"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -49,12 +51,13 @@ func Edit(layoutName string) error {
 	editor := os.Getenv("EDITOR")
 
 	if editor == "" {
-		return fmt.Errorf(`$EDITOR is empty, could not edit "%s" layout`, layoutName)
+		err := fmt.Errorf("$EDITOR environment variable is empty")
+		return errors.Wrapf(err, "could not edit %s", layoutName)
 	}
 
 	layoutPath, err := getLayoutPath(layoutName)
 	if err != nil {
-		return fmt.Errorf("layout not found: %s", err)
+		return errors.Wrap(err, "could not get layout path")
 	}
 
 	cmd := ExecCommand(editor, layoutPath)
@@ -92,12 +95,12 @@ func List() (list []string) {
 func (l *Layout) Parse() error {
 	yamlFileContent, err := getLayoutContent(l.fileName)
 	if err != nil {
-		return fmt.Errorf("parse: %s\n", err)
+		return errors.Wrap(err, "could not get layout content")
 	}
 
 	err = yaml.Unmarshal(yamlFileContent, &l.content)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "yaml unmarshal failed")
 	}
 
 	l.TmuxSession = tmux.NewSession(getSessionName(l.content))
@@ -116,7 +119,7 @@ func (l *Layout) Parse() error {
 		for _, paneCommand := range getWindowPanes(window) {
 			switch pcType := paneCommand.(type) {
 			default:
-				return fmt.Errorf("Invalid pane command: %v", pcType)
+				return fmt.Errorf(`invalid pane command "%v"`, pcType)
 			case map[interface{}]interface{}: // Multiple commands for a pane
 				if commands, ok := paneCommand.(map[interface{}]interface{})["commands"]; ok {
 					tmuxPane := tmux.NewPane(getWindowRoot(window))
@@ -214,7 +217,7 @@ func getLayoutPath(layoutName string) (string, error) {
 		return ymlFile, nil
 	}
 
-	return "", fmt.Errorf(`layout "%s" doesn't exists`, layoutName)
+	return "", fmt.Errorf(`layout "%s" does not exists`, layoutName)
 }
 
 func getLayoutWithExtension(layoutName, extension string) string {
@@ -228,12 +231,12 @@ func getLayoutWithExtension(layoutName, extension string) string {
 func getLayoutContent(layoutName string) ([]byte, error) {
 	layoutPath, err := getLayoutPath(layoutName)
 	if err != nil {
-		return []byte{}, fmt.Errorf("layout not found: %s", err)
+		return []byte{}, errors.Wrap(err, "could not get layout path")
 	}
 
 	yamlFileContent, err := ioutil.ReadFile(layoutPath)
 	if err != nil {
-		return []byte{}, fmt.Errorf("can't read layout: %s", err)
+		return []byte{}, errors.Wrap(err, "could not read layout")
 	}
 
 	return yamlFileContent, nil
