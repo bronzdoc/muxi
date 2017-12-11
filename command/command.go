@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type BaseCommand interface {
@@ -35,7 +37,7 @@ func NewTmuxCommand(tmuxCommand string, options ...string) TmuxCommand {
 
 func (c *TmuxCommand) Execute() {
 	if err := runShell(c.cmd, c.cmdOptions); err != nil {
-		fmt.Printf("Execute failded %v", err)
+		panic(fmt.Sprintf("Execute failded %v", err))
 	}
 
 	for _, postHook := range c.postHooks {
@@ -61,11 +63,11 @@ func runShell(command string, cmdOptions []string) error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("Error starting command %s", err)
+		return errors.Wrap(err, "Error starting command")
 	}
 
 	if err := cmd.Wait(); err != nil {
-		return fmt.Errorf("Error waiting command: %s ", err)
+		return errors.Wrap(err, "Error waiting command")
 	}
 
 	return nil
