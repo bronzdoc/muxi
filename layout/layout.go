@@ -103,6 +103,10 @@ func (l *Layout) Parse() error {
 		return errors.Wrap(err, "yaml unmarshal failed")
 	}
 
+	if len(l.content) == 0 {
+		return fmt.Errorf("layout content is empty")
+	}
+
 	l.TmuxSession = tmux.NewSession(getSessionName(l.content))
 
 	windows := l.content["windows"].([]interface{})
