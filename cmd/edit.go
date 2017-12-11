@@ -14,14 +14,14 @@ var editCmd = &cobra.Command{
 	Short: "Edit a layout content",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) <= 0 {
-			fmt.Println("muxi: no layout to edit given, see muxi edit --help")
+			fmt.Println("no layout to edit given, see muxi edit --help")
 			os.Exit(1)
 		}
 
 		layoutName := args[0]
 
 		if err := layout.Edit(layoutName); err != nil {
-			fmt.Printf("muxi: %s\n", err)
+			fmt.Println(errors.Wrap(err, "Error editing layout"))
 			os.Exit(1)
 		}
 	},

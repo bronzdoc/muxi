@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/bronzdoc/muxi/layout"
+	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -15,7 +17,7 @@ var startCmd = &cobra.Command{
 	Short: "Start a tmux session using a muxi layout",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) <= 0 {
-			fmt.Println("muxi: no layout to edit given, see muxi edit --help")
+			fmt.Println("no layout to edit given, see muxi edit --help")
 			os.Exit(1)
 		}
 
@@ -24,7 +26,7 @@ var startCmd = &cobra.Command{
 		muxiLayout := layout.New(layoutName)
 
 		if err := muxiLayout.Parse(); err != nil {
-			fmt.Printf("muxi: %s", err)
+			fmt.Println(errors.Wrap(err, "Error parsing layout"))
 			os.Exit(1)
 		}
 

@@ -13,7 +13,7 @@ var listCmd = &cobra.Command{
 	Short: "List all muxi layouts",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(layout.List()) <= 0 {
-			fmt.Println("muxi: no layouts found")
+			fmt.Println("no layouts found")
 			return
 		}
 

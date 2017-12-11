@@ -14,7 +14,7 @@ var showCmd = &cobra.Command{
 	Short: "Show the content of a muxi layout",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) <= 0 {
-			fmt.Println("muxi: no layout to edit given, see muxi edit --help")
+			fmt.Println("no layout to edit given, see muxi edit --help")
 			os.Exit(1)
 		}
 
@@ -23,9 +23,8 @@ var showCmd = &cobra.Command{
 		muxiLayout := layout.New(layoutName)
 
 		layoutContent, err := muxiLayout.RawContent()
-
 		if err != nil {
-			fmt.Printf("muxi: %s", err)
+			fmt.Println(errors.Wrap(err, "Error getting layout content"))
 			os.Exit(1)
 		}
 
