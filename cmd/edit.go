@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/bronzdoc/muxi/layout"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
