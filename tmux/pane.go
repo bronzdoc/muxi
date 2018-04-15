@@ -2,6 +2,7 @@ package tmux
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bronzdoc/muxi/command"
 )
@@ -47,7 +48,9 @@ func (p *Pane) Commands() []string {
 func (p *Pane) Create() {
 	p.index = PANE_INDEX
 
-	p.tmuxCommand.Execute()
+	if err := p.tmuxCommand.Execute(); err != nil {
+		log.Fatalf("Couldn't create panes %v", err)
+	}
 
 	PANE_INDEX += 1
 }

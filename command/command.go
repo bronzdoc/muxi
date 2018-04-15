@@ -10,7 +10,7 @@ import (
 )
 
 type BaseCommand interface {
-	Execute()
+	Execute() error
 	PostHooks() []func()
 	AddPostHook(func())
 	Options() []string
@@ -35,14 +35,16 @@ func NewTmuxCommand(tmuxCommand string, options ...string) TmuxCommand {
 	return t
 }
 
-func (c *TmuxCommand) Execute() {
-	if err := runShell(c.cmd, c.cmdOptions); err != nil {
-		panic(fmt.Sprintf("Execute failded %v", err))
+func (c *TmuxCommand) Execute() error {
+	if err := c.runShell(c.cmd, c.cmdOptions); err != nil {
+		return err
 	}
 
 	for _, postHook := range c.postHooks {
 		postHook()
 	}
+
+	return nil
 }
 
 func (c *TmuxCommand) AddPostHook(hook func()) {
@@ -52,23 +54,16 @@ func (c *TmuxCommand) AddPostHook(hook func()) {
 func (c *TmuxCommand) PostHooks() []func() {
 	return c.postHooks
 }
+
 func (c *TmuxCommand) Options() []string {
 	return c.options
 }
 
-func runShell(command string, cmdOptions []string) error {
+func (c *TmuxCommand) runShell(command string, cmdOptions []string) error {
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("%s %s", command, strings.Join(cmdOptions, " ")))
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Start(); err != nil {
-		return errors.Wrap(err, "Error starting command")
-	}
-
-	if err := cmd.Wait(); err != nil {
-		return errors.Wrap(err, "Error waiting command")
-	}
-
-	return nil
+	return cmd.Run()
 }

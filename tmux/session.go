@@ -2,6 +2,7 @@ package tmux
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -57,7 +58,9 @@ func (s *Session) Name() string {
 
 // Creates a new tmux session and its windows
 func (s *Session) Create() {
-	s.tmuxCommand.Execute()
+	if err := s.tmuxCommand.Execute(); err != nil {
+		log.Fatalf("Couldn't create session '%s' %v", s.sessionName, err)
+	}
 }
 
 func (s *Session) createWindows() {

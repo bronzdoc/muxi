@@ -2,6 +2,7 @@ package tmux
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/bronzdoc/muxi/command"
 	"github.com/spf13/viper"
@@ -77,7 +78,9 @@ func (w *Window) Name() string {
 
 // Creates a new tmux window and its child panes
 func (w *Window) Create() {
-	w.tmuxCommand.Execute()
+	if err := w.tmuxCommand.Execute(); err != nil {
+		log.Fatalf("Couldn't create panes %v", err)
+	}
 }
 
 func (w *Window) createPanes() {
