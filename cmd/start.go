@@ -17,7 +17,7 @@ var startCmd = &cobra.Command{
 	Short: "Start a tmux session using a muxi layout",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) <= 0 {
-			fmt.Println("no layout to edit given, see muxi edit --help")
+			fmt.Println("no layout to start given, see muxi start --help")
 			os.Exit(1)
 		}
 
