@@ -15,7 +15,7 @@ var showCmd = &cobra.Command{
 	Short: "Show the content of a muxi layout",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) <= 0 {
-			fmt.Println("no layout to edit given, see muxi edit --help")
+			fmt.Println("no layout to show given, see muxi show --help")
 			os.Exit(1)
 		}
 
